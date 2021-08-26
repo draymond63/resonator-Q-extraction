@@ -13,37 +13,34 @@ def createData(Q, w0, F0=1, num_points=1000, noise=0.01, plot=False):
 	iq = lorentz * np.exp(arc * 1j)
 
 	if plot:
-		plt.plot(lorentz)
-		plt.plot(arc)
-		plt.show()
-		plt.plot(np.real(iq), np.imag(iq), 'o')
+		fig, axs = plt.subplots(2, 1)
+		axs[0].plot(lorentz)
+		axs[1].plot(arc)
 		plt.show()
 	return iq
 
 # Returns polynomial
 def fitAmpVsPhase(iq, plot=False):
-	# amp = np.abs(iq)
-	# phase = 
-	test_coef = (1, 1, 1)
-	amp = np.polynomial.polynomial.polyval(phase, test_coef)
+	amp = np.abs(iq)
+	phase = np.unwrap(np.angle(iq))
 
-	poly = np.polynomial.polynomial.Polynomial.fit(phase, amp, deg=2)
-	print(poly.coef)
+	poly = np.polynomial.polynomial.Polynomial.fit(phase, amp, deg=2).convert().coef
+	print(poly)
 	if plot:
-		fit = np.polynomial.polynomial.polyval(phase, poly.coef)
+		fit = np.polynomial.polynomial.polyval(phase, poly)
+		plt.plot(phase, amp, 'o')
 		plt.plot(phase, fit)
-		plt.plot(phase, amp)
 		plt.show()
-	return poly.coef
+	return poly
 
 # Gets Q
 def getQ(coef: tuple):
 	c, b, a = coef
-	Q = c / (2 * b)
+	Q = b / (2 * c)
 	return Q
 
 if __name__ == '__main__':
-	Q = 100
-	iq = createData(Q=Q, w0=5, F0=1/Q, noise=0, num_points=10000)
-	coef = fitAmpVsPhase(iq, plot=True)
+	Q = 1000
+	iq = createData(Q=Q, w0=5, F0=1/Q, noise=0, num_points=10000, plot=True)
+	coef = fitAmpVsPhase(iq)
 	print(getQ(coef))
